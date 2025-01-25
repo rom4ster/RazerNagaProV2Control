@@ -1,0 +1,7 @@
+﻿  RazerNagaProV2Control.cpp
+C:\Users\rom4ster\source\repos\RazerNaga\RazerNagaProV2Control\CommandData.h(139,16): warning C4091: 'typedef ': ignored on left of 'button_read' when no variable is declared
+  (compiling source file 'RazerNagaProV2Control.cpp')
+  
+C:\Users\rom4ster\source\repos\RazerNaga\RazerNagaProV2Control\RazerNagaProV2Control.cpp(124,9): warning C4154: deletion of an array expression; conversion to pointer supplied
+C:\Users\rom4ster\source\repos\RazerNaga\RazerNagaProV2Control\RazerNagaProV2Control.cpp(408,20): warning C4244: 'initializing': conversion from 'long' to 'char', possible loss of data
+  RazerNagaProV2Control.vcxproj -> C:\Users\rom4ster\source\repos\RazerNaga\windows\x64\Debug\RazerNagaProV2Control.exe

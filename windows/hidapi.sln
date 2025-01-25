@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.136
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hidapi", "hidapi.vcxproj", "{A107C21C-418A-4697-BB10-20C3AA60E2E4}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hidtest", "hidtest.vcxproj", "{23E9FF6A-49D1-4993-B2B5-BBB992C6C712}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RazerHidTester", "..\RazerHidTester\RazerHidTester.vcxproj", "{C928EB46-5B31-4564-B41E-64556EA31C38}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RazerNagaProV2Control", "..\RazerNagaProV2Control\RazerNagaProV2Control.vcxproj", "{942B1F13-2EDD-4F93-B660-9B190D31A759}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +35,22 @@ Global
 		{23E9FF6A-49D1-4993-B2B5-BBB992C6C712}.Release|Win32.Build.0 = Release|Win32
 		{23E9FF6A-49D1-4993-B2B5-BBB992C6C712}.Release|x64.ActiveCfg = Release|x64
 		{23E9FF6A-49D1-4993-B2B5-BBB992C6C712}.Release|x64.Build.0 = Release|x64
+		{C928EB46-5B31-4564-B41E-64556EA31C38}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C928EB46-5B31-4564-B41E-64556EA31C38}.Debug|Win32.Build.0 = Debug|Win32
+		{C928EB46-5B31-4564-B41E-64556EA31C38}.Debug|x64.ActiveCfg = Debug|x64
+		{C928EB46-5B31-4564-B41E-64556EA31C38}.Debug|x64.Build.0 = Debug|x64
+		{C928EB46-5B31-4564-B41E-64556EA31C38}.Release|Win32.ActiveCfg = Release|Win32
+		{C928EB46-5B31-4564-B41E-64556EA31C38}.Release|Win32.Build.0 = Release|Win32
+		{C928EB46-5B31-4564-B41E-64556EA31C38}.Release|x64.ActiveCfg = Release|x64
+		{C928EB46-5B31-4564-B41E-64556EA31C38}.Release|x64.Build.0 = Release|x64
+		{942B1F13-2EDD-4F93-B660-9B190D31A759}.Debug|Win32.ActiveCfg = Debug|Win32
+		{942B1F13-2EDD-4F93-B660-9B190D31A759}.Debug|Win32.Build.0 = Debug|Win32
+		{942B1F13-2EDD-4F93-B660-9B190D31A759}.Debug|x64.ActiveCfg = Debug|x64
+		{942B1F13-2EDD-4F93-B660-9B190D31A759}.Debug|x64.Build.0 = Debug|x64
+		{942B1F13-2EDD-4F93-B660-9B190D31A759}.Release|Win32.ActiveCfg = Release|Win32
+		{942B1F13-2EDD-4F93-B660-9B190D31A759}.Release|Win32.Build.0 = Release|Win32
+		{942B1F13-2EDD-4F93-B660-9B190D31A759}.Release|x64.ActiveCfg = Release|x64
+		{942B1F13-2EDD-4F93-B660-9B190D31A759}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
