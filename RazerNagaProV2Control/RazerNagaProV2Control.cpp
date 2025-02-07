@@ -208,6 +208,34 @@ void razer_button_action(bool write, button_command * button_command) {
 
 }
 
+
+
+void razer_scroll_action( scroll_command* button_command) {
+
+    razer_command* command = new razer_command();
+    class_id command_class;
+    command_class.command_class = 0x15;
+    command_class.id = 0x07;
+
+
+    command->status = NEW;
+    command->packets_remaining = 0x0;
+    command->prototype = CONSTANT;
+    command->data_size = RAZER_SCROLL_COMMAND_SIZE;
+    command->command = command_class;
+
+    unsigned char* dataptr = (unsigned char*)command->data;
+    zeroarr(dataptr, command->data_size);
+
+    memcpy(dataptr, button_command, sizeof(button_command));
+
+    auto ret = razer_set_report(command);
+
+    std::cout << "Success? -> " << ret << std::endl;
+
+
+}
+
 button_command* keyboard_command(char profile, BUTTON_VALUES button_num, HYPERSHIFT hypershift, char hid_modifier, char hid_button) {
 
     button_command* ret = new button_command;
@@ -245,6 +273,27 @@ button_command* mouse_command(char profile, BUTTON_VALUES button_num, HYPERSHIFT
     
 }
 
+
+
+
+struct scroll_command* scroll_command(char profile, unsigned char active, std::vector<SCROLL_STAGE> scroll_stages, unsigned char len) {
+
+    struct scroll_command* ret = new struct scroll_command;
+    zeroarr((unsigned char * ) ret->data, 0);
+
+    for (int i = 0; i < len; i++) {
+        ret->data[i] = scroll_stages[i];
+    }
+
+    ret->size = len;
+    ret->profile = profile;
+    ret->selection = active;
+
+    return ret;
+
+}
+
+
 button_read * read_command(char profile, BUTTON_VALUES button_num, HYPERSHIFT hypershift) {
     
     button_read * ret = new button_read;
@@ -259,6 +308,8 @@ button_read * read_command(char profile, BUTTON_VALUES button_num, HYPERSHIFT hy
 
     
 }
+
+
 
 
 inline bool fexists(const std::string& name) {
@@ -348,9 +399,17 @@ void clear_config() {
 
 void init_interactions() {
 
+    interactions.push_back(INTERACTION("mode", "Select mode, 0 for keybind 1 for scroll"));
     interactions.push_back(INTERACTION("restore", "Restore or Write Operation? 0 for restore 1 for write"));
     interactions.push_back(INTERACTION("profile", "Which Profile (0 for non persist profile)"));
     interactions.push_back(INTERACTION("button", "What is the number of the button you want to change"));
+    interactions.push_back(INTERACTION("stage", "What is the number of the stage you want to be activated standard, distinct, ultrafine, adaptive, smoothscroll, custom (1-6)"));
+    interactions.push_back(INTERACTION("stage1", "What is the number of the first stage standard, distinct, ultrafine, adaptive, smoothscroll, custom (81-86) or 0 for not included"));
+    interactions.push_back(INTERACTION("stage2", "What is the number of the second stage standard, distinct, ultrafine, adaptive, smoothscroll, custom (81-86) or 0 for not included"));
+    interactions.push_back(INTERACTION("stage3", "What is the number of the third stage standard, distinct, ultrafine, adaptive, smoothscroll, custom (81-86) or 0 for not included"));
+    interactions.push_back(INTERACTION("stage4", "What is the number of the fourth stage standard, distinct, ultrafine, adaptive, smoothscroll, custom (81-86) or 0 for not included"));
+    interactions.push_back(INTERACTION("stage5", "What is the number of the fifth stage standard, distinct, ultrafine, adaptive, smoothscroll, custom (81-86) or 0 for not included"));
+    interactions.push_back(INTERACTION("stage6", "What is the number of the last stage standard, distinct, ultrafine, adaptive, smoothscroll, custom (81-86) or 0 for not included"));
     interactions.push_back(INTERACTION("hypershift", "Is this the hypershift profile (yes 1, no 0)?"));
     interactions.push_back(INTERACTION("category", "What Category of Keybind do you wish to do (keyboard is 2 and mouse is 1)?"));
     interactions.push_back(INTERACTION("bind_modifier", "What modifier would you apply to your bind? (0 for null)"));
@@ -423,6 +482,40 @@ void interact(std::map<std::string, char> * args) {
     button_command* cmd = nullptr;
     
     SET_INTERACTION_PTR(args);
+
+    char mode = INTERACTION_GET("mode");
+    
+
+    if (mode == 1) {
+
+        char profile = INTERACTION_GET("profile");
+        char stage = INTERACTION_GET("stage");
+        char stage1 = INTERACTION_GET("stage1");
+        char stage2 = INTERACTION_GET("stage2");
+        char stage3 = INTERACTION_GET("stage3");
+        char stage4 = INTERACTION_GET("stage4");
+        char stage5 = INTERACTION_GET("stage5");
+        char stage6 = INTERACTION_GET("stage6");
+
+        std::vector<SCROLL_STAGE> vec { (SCROLL_STAGE) stage1, (SCROLL_STAGE) stage2, (SCROLL_STAGE) stage3,(SCROLL_STAGE) stage4, (SCROLL_STAGE) stage5, (SCROLL_STAGE) stage6};
+        // Use std::remove to move all zeros to the end of the vector
+        auto new_end = std::remove(vec.begin(), vec.end(), 0);
+
+        // Erase the "removed" elements
+        vec.erase(new_end, vec.end());
+
+        auto cmd = scroll_command(profile, (unsigned char) stage, ( std::vector<SCROLL_STAGE> ) vec, vec.size());
+
+        razer_scroll_action(cmd);
+
+        CLEAR_INTERACTION_PTR();
+
+        return;
+        
+
+    }
+
+
     char restore = INTERACTION_GET("restore");
 
     
@@ -523,7 +616,7 @@ void interact(std::map<std::string, char> * args) {
 
 int main(int argc, char ** argv )
 {
-    std::cout << "Hello World!\n";
+   // std::cout << "Hello World!\n";
     init();
     
     interact(parse_args(argc, argv));
@@ -532,14 +625,33 @@ int main(int argc, char ** argv )
     
     quit();
     exit(-1);
-    auto ret = razer_get_report();
-    std::cout << (int) ret->status << " " << (int) ret->tid << " " <<  (int) ret->command.command_class <<(int) ret->command.id << std::endl;
-    auto btn_info = keyboard_command(0x01,(BUTTON_VALUES) 0x40, OFF, 0x0, 0x0A);
 
-    razer_write_button(btn_info);
+    razer_command command;
+    class_id* cmdid = new class_id;
 
-    ret = razer_get_report();
-    std::cout << (int)ret->status << " " << (int)ret->tid << " " << (int)ret->command.command_class << (int)ret->command.id << std::endl;
+
+
+    cmdid->id = 0x04;
+    cmdid->command_class = 0x15;
+    
+    //unsigned char data[] = { 0x1, 0x6, 0x2, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xea, 0x3e, 0x1, 0x41, 0x0, 0x0, 0x0, 0x0, 0xdc, 0x34, 0x32, 0x42, 0x0, 0x0, 0x0, 0x0, 0x92, 0xb9, 0x32, 0x42, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x34, 0x42, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x60, 0x0 };
+    //unsigned char data[] = { 0x1, 0x6, 0x2, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0x0, 0x0, 0x6c, 0x9, 0xf9, 0x3d, 0xea, 0x3e, 0x1, 0x41, 0x46, 0xa0, 0xfc, 0x3d, 0xdc, 0x34, 0x32, 0x42, 0xb6, 0xe1, 0x2, 0x3e, 0x92, 0xb9, 0x32, 0x42, 0x43, 0xf6, 0xfd, 0x3d, 0x0, 0x0, 0x34, 0x42, 0x11, 0x8d, 0xee, 0x3d, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xb7, 0x0 };
+    //unsigned char data[] = { 0x1, 0x6, 0x2, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0x0, 0x0, 0x6c, 0x9, 0xf9, 0x3d, 0xea, 0x3e, 0x81, 0x41, 0x46, 0xa0, 0xfc, 0x3d, 0xdc, 0x34, 0xb2, 0x42, 0xb6, 0xe1, 0x2, 0x3e, 0x92, 0xb9, 0xb2, 0x42, 0x43, 0xf6, 0xfd, 0x3d, 0x0, 0x0, 0xb4, 0x42, 0x11, 0x8d, 0xee, 0x3d, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xb7, 0x0 };
+    //unsigned char data[] = { 0x1, 0x6, 0x2, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0x0, 0x0, 0xe3, 0xa5, 0x9b, 0x3c, 0xea, 0x3e, 0x81, 0x41, 0x2c, 0xe4, 0x9d, 0x3c, 0xdc, 0x34, 0xb2, 0x42, 0x24, 0x9a, 0xa3, 0x3c, 0x92, 0xb9, 0xb2, 0x42, 0xea, 0xb9, 0x9e, 0x3c, 0x0, 0x0, 0xb4, 0x42, 0x2b, 0x18, 0x95, 0x3c, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xa2, 0x0 };
+    //unsigned char data[] = { 0x1, 0x6, 0x2, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0xc0, 0xff, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x80, 0x7f, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x80, 0x7f, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x80, 0x7f, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x80, 0x7f, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x7e, 0x0 };
+
+    //command.status = NEW;
+    //command.tid = 0x0;
+    //command.packets_remaining = 0x0;
+    //command.prototype = CONSTANT;
+    //command.data_size = 0x50;
+    //command.command = *cmdid;
+    //command.reserved = CONSTANT;
+    //memcpy(&command.data, data2, sizeof(data));
+
+    razer_set_report(&command);
+
+
 
     quit();
 

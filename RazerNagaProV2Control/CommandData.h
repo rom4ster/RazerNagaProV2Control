@@ -123,6 +123,19 @@ enum DPI_OPERATION : unsigned char {
 };
 
 
+enum SCROLL_STAGE : unsigned char {
+
+	STANDARD = 0x081,
+	DISTINCT = 0x082,
+	ULTRAFINE = 0x083,
+	ADAPTIVE = 0x084,
+	SMOOTHSCROLL = 0x085,
+	CUSTOM = 0x086,
+	
+
+};
+
+
 
 typedef struct button_command {
 
@@ -135,6 +148,20 @@ typedef struct button_command {
 
 
 } button_command;
+
+
+typedef struct scroll_command {
+
+	unsigned char profile;
+	unsigned char selection;
+	unsigned char size;
+	SCROLL_STAGE data[6];
+
+
+} scroll_command;
+
+
+
 
 typedef struct button_read {
 
